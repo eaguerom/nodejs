@@ -1,0 +1,64 @@
+// require others
+const Pool = require('pg').Pool
+
+let pool
+let result
+
+/**
+ * Class used to comunicate with data base
+ * 
+ * @version 1.0
+ * @author edel (1.0)
+ **/
+class DataBaseHelper {
+
+    constructor() {
+        // Create a connection pool from data base
+        pool = new Pool({
+            host: '186.15.156.121',
+            database: 'e-comm-db',
+            user: 'e-comm',
+            password: '3-C0mm!',
+            port: 5432,
+            max: 25 // max number of clients in the pool
+        })
+    }
+
+    /**
+     * User for Select insert, delete and updates in data base
+     * 
+     * result 1 - the query was succesfull
+     */
+    query = async(sql) => {
+        try {
+            await pool.query('BEGIN')
+            await pool.query(sql)
+            result = 1
+            await pool.query('COMMIT')
+
+        } catch (e) {
+            await pool.query('ROLLBACK')
+            throw e
+        }
+
+        return result;
+    }
+
+    /**
+     * User for Select querys in data base,
+     */
+    select = async(sql) => {
+        try {
+            await pool.query('BEGIN')
+            result = await pool.query(sql)
+            await pool.query('COMMIT')
+        } catch (e) {
+            await pool.query('ROLLBACK')
+            throw e
+        }
+
+        return result.rows
+    }
+}
+
+module.exports = DataBaseHelper;
